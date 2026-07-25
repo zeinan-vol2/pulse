@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zeinan — Browser Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #080b10;
+      --surface:  #0d1117;
+      --border:   #1c2333;
+      --accent:   #00e5ff;
+      --accent2:  #7c3aed;
+      --text:     #c9d1d9;
+      --muted:    #4a5568;
+      --label:    #58a6ff;
+      --good:     #3fb950;
+      --warn:     #d29922;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Radial glow top-center */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(0,229,255,0.07) 0%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 48px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 8px var(--good);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Grid layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(0,229,255,0.25);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.3), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover::before { opacity: 1; }
+
+    .card-full   { grid-column: span 12; }
+    .card-half   { grid-column: span 6; }
+    .card-third  { grid-column: span 4; }
+    .card-two3   { grid-column: span 8; }
+
+    @media (max-width: 680px) {
+      .card-half, .card-third, .card-two3 { grid-column: span 12; }
+    }
+
+    .card-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* IP hero card */
+    .ip-hero {
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .ip-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .ip-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .ip-location {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* Stat rows */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .stat-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .stat-row:first-child { padding-top: 0; }
+
+    .stat-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      flex-shrink: 0;
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .stat-val.highlight { color: var(--accent); }
+    .stat-val.warn { color: var(--warn); }
+    .stat-val.good { color: var(--good); }
+
+    /* Big metric */
+    .big-metric {
+      margin-top: 8px;
+    }
+
+    .big-metric .number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 48px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .big-metric .unit {
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-green { background: rgba(63,185,80,0.12); color: var(--good); border: 1px solid rgba(63,185,80,0.25); }
+    .badge-warn  { background: rgba(210,153,34,0.12); color: var(--warn); border: 1px solid rgba(210,153,34,0.25); }
+    .badge-blue  { background: rgba(88,166,255,0.12); color: var(--label); border: 1px solid rgba(88,166,255,0.25); }
+    .badge-cyan  { background: rgba(0,229,255,0.10); color: var(--accent); border: 1px solid rgba(0,229,255,0.2); }
+
+    /* Progress bar */
+    .prog-wrap { margin-top: 12px; }
+    .prog-label { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .prog-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 1s ease; width: 0%; }
+
+    /* Screen visual */
+    .screen-vis {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .screen-box {
+      border: 2px solid var(--accent);
+      border-radius: 4px;
+      background: rgba(0,229,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Loading state */
+    .loading-shimmer {
+      background: linear-gradient(90deg, var(--border) 25%, rgba(255,255,255,0.04) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+      height: 14px;
+      width: 80%;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Timestamp footer */
+    .ts {
+      text-align: center;
+      margin-top: 48px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* Consent banner */
+    .consent {
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .consent-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .consent strong { color: var(--text); }
+
+    /* Scan animation on IP card */
+    @keyframes scan {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(400%); opacity: 0; }
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: scan 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="logo">// system report</div>
+    <h1>Zeinan</h1>
+    <p class="subtitle">what your browser tells the world</p>
+  </header>
+
+  <div class="consent">
+    <span class="consent-icon">🔍</span>
+    <span><strong>All data is processed locally and never leaves your device. This environment is strictly for testing purposes only.</strong> </span>
+  </div><
+
+  <div class="status-bar">
+    <span class="status-dot"></span>
+    <span id="status-text">Scanning your browser...</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- IP Hero -->
+    <div class="card card-full ip-hero" id="card-ip">
+      <div class="scan-line"></div>
+      <div class="card-eyebrow">Network Identity</div>
+      <div style="display:flex; justify-content:center; gap:48px; flex-wrap:wrap; margin-bottom:8px;">
+        <div>
+          <div class="ip-label">Public IP</div>
+          <div class="ip-value" id="ip-val">···.···.···.···</div>
+        </div>
+        <div style="width:1px; background:var(--border); align-self:stretch; flex-shrink:0;"></div>
+        <div>
+          <div class="ip-label">Local Network IP</div>
+          <div class="ip-value" id="ip-local" style="font-size:clamp(20px,3vw,32px); color: var(--accent);">Detecting...</div>
+        </div>
+      </div>
+      <div class="ip-location" id="ip-loc">Locating...</div>
+      <div style="margin-top:16px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+        <span class="badge badge-blue" id="badge-isp">ISP: —</span>
+        <span class="badge badge-cyan" id="badge-tz">TZ: —</span>
+        <span class="badge" id="badge-vpn" style="display:none"></span>
+      </div>
+    </div>
+
+    <!-- Network details -->
+    <div class="card card-half">
+      <div class="card-eyebrow">Connection</div>
+      <div class="stat-row"><span class="stat-key">Type</span><span class="stat-val highlight" id="conn-type">—</span></div>
+      <div class="stat-row"><span class="stat-key">ZIP</span><span class="stat-val" id="conn-zip">—</span></div>
+      <div class="stat-row"><span class="stat-key">VPN / Proxy</span><span class="stat-val" id="conn-vpn">—</span></div>
+      <div class="stat-row"><span class="stat-key">Local IP</span><span class="stat-val highlight" id="conn-localip">Detecting...</span></div>
+      <div class="stat-row"><span class="stat-key">Referrer</span><span class="stat-val" id="conn-ref">—</span></div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="card card-half">
+      <div class="card-eyebrow">Privacy Signals</div>
+      <div class="stat-row"><span class="stat-key">Do Not Track</span><span class="stat-val" id="priv-dnt">—</span></div>
+      <div class="stat-row"><span class="stat-key">AdBlock</span><span class="stat-val" id="priv-ad">—</span></div>
+      <div class="stat-row"><span class="stat-key">Incognito</span><span class="stat-val" id="priv-inc">—</span></div>
+      <div class="stat-row"><span class="stat-key">Cookies</span><span class="stat-val" id="priv-cook">—</span></div>
+    </div>
+
+    <!-- CPU -->
+    <div class="card card-third">
+      <div class="card-eyebrow">CPU</div>
+      <div class="big-metric">
+        <span class="number" id="hw-cpu">—</span>
+        <span class="unit">cores</span>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Logical threads</span><span id="cpu-pct">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="cpu-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- RAM -->
+    <div class="card card-third">
+      <div class="card-eyebrow">Memory</div>
+      <div class="big-metric">
+        <span class="number" id="hw-ram">—</span>
+        <span class="unit">GB</span>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Reported RAM</span><span id="ram-pct">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="ram-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- Battery -->
+    <div class="card card-third">
+      <div class="card-eyebrow">Battery</div>
+      <div class="big-metric">
+        <span class="number" id="hw-bat">—</span>
+        <span class="unit">%</span>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Charge level</span><span id="bat-status">—</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="bat-bar" style="background: linear-gradient(90deg,#3fb950,#7ee787)"></div></div>
+      </div>
+    </div>
+
+    <!-- Screen -->
+    <div class="card card-half">
+      <div class="card-eyebrow">Display</div>
+      <div class="screen-vis">
+        <div class="screen-box" id="screen-box" style="width:80px;height:54px;">
+          <span id="screen-ratio">—</span>
+        </div>
+        <div style="flex:1">
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Resolution</span><span class="stat-val highlight" id="hw-screen">—</span></div>
+          <div class="stat-row"><span class="stat-key">Color Depth</span><span class="stat-val" id="hw-color">—</span></div>
+          <div class="stat-row"><span class="stat-key">Touch</span><span class="stat-val" id="hw-touch">—</span></div>
+          <div class="stat-row"><span class="stat-key">Pixel Ratio</span><span class="stat-val" id="hw-dpr">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GPU + Audio -->
+    <div class="card card-half">
+      <div class="card-eyebrow">Graphics & Audio</div>
+      <div class="stat-row" style="padding-top:0"><span class="stat-key">GPU</span><span class="stat-val" id="hw-gpu" style="font-size:11px;max-width:60%">—</span></div>
+      <div class="stat-row"><span class="stat-key">WebGL</span><span class="stat-val" id="hw-webgl">—</span></div>
+      <div class="stat-row"><span class="stat-key">Audio Bins</span><span class="stat-val" id="hw-audio">—</span></div>
+      <div class="stat-row"><span class="stat-key">Canvas FP</span><span class="stat-val" id="hw-canvas" style="font-size:10px;max-width:60%">—</span></div>
+    </div>
+
+    <!-- Browser -->
+    <div class="card card-full">
+      <div class="card-eyebrow">Browser & Platform</div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 32px;">
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Browser</span><span class="stat-val" id="br-name">—</span></div>
+          <div class="stat-row"><span class="stat-key">Platform</span><span class="stat-val" id="br-platform">—</span></div>
+          <div class="stat-row"><span class="stat-key">Language</span><span class="stat-val" id="br-lang">—</span></div>
+          <div class="stat-row"><span class="stat-key">Languages</span><span class="stat-val" id="br-langs">—</span></div>
+        </div>
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Timezone</span><span class="stat-val" id="br-tz">—</span></div>
+          <div class="stat-row"><span class="stat-key">Dark Mode</span><span class="stat-val" id="br-dark">—</span></div>
+          <div class="stat-row"><span class="stat-key">Load Time</span><span class="stat-val" id="br-loadtime">—</span></div>
+        </div>
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">WebRTC</span><span class="stat-val" id="br-rtc">—</span></div>
+          <div class="stat-row"><span class="stat-key">IndexedDB</span><span class="stat-val" id="br-idb">—</span></div>
+          <div class="stat-row"><span class="stat-key">ServiceWorker</span><span class="stat-val" id="br-sw">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TLS / HTTPS -->
+    <div class="card card-full">
+      <div class="card-eyebrow">TLS / HTTPS</div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 32px;">
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Protocol</span><span class="stat-val highlight" id="tls-protocol">—</span></div>
+          <div class="stat-row"><span class="stat-key">Connection</span><span class="stat-val" id="tls-secure">—</span></div>
+          <div class="stat-row"><span class="stat-key">HTTP/2</span><span class="stat-val" id="tls-h2">—</span></div>
+        </div>
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">HSTS</span><span class="stat-val" id="tls-hsts">—</span></div>
+          <div class="stat-row"><span class="stat-key">Mixed Content</span><span class="stat-val" id="tls-mixed">—</span></div>
+          <div class="stat-row"><span class="stat-key">Secure Cookies</span><span class="stat-val" id="tls-cookies">—</span></div>
+        </div>
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">WebCrypto API</span><span class="stat-val" id="tls-crypto">—</span></div>
+          <div class="stat-row"><span class="stat-key">SubtleCrypto</span><span class="stat-val" id="tls-subtle">—</span></div>
+          <div class="stat-row"><span class="stat-key">Crypto Random</span><span class="stat-val" id="tls-random">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deep Referrer -->
+    <div class="card card-full">
+      <div class="card-eyebrow">Referrer & Navigation</div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 32px;">
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Referrer</span><span class="stat-val" id="ref-url" style="font-size:11px;max-width:70%;word-break:break-all">—</span></div>
+          <div class="stat-row"><span class="stat-key">Referrer Domain</span><span class="stat-val highlight" id="ref-domain">—</span></div>
+          <div class="stat-row"><span class="stat-key">Referrer Type</span><span class="stat-val" id="ref-type">—</span></div>
+          <div class="stat-row"><span class="stat-key">Search Engine</span><span class="stat-val" id="ref-engine">—</span></div>
+          <div class="stat-row"><span class="stat-key">Search Query</span><span class="stat-val highlight" id="ref-query">—</span></div>
+        </div>
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">UTM Source</span><span class="stat-val" id="ref-utm-source">—</span></div>
+          <div class="stat-row"><span class="stat-key">UTM Medium</span><span class="stat-val" id="ref-utm-medium">—</span></div>
+          <div class="stat-row"><span class="stat-key">UTM Campaign</span><span class="stat-val" id="ref-utm-campaign">—</span></div>
+          <div class="stat-row"><span class="stat-key">UTM Term</span><span class="stat-val" id="ref-utm-term">—</span></div>
+          <div class="stat-row"><span class="stat-key">UTM Content</span><span class="stat-val" id="ref-utm-content">—</span></div>
+        </div>
+        <div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Nav Type</span><span class="stat-val" id="ref-navtype">—</span></div>
+          <div class="stat-row"><span class="stat-key">Nav Redirects</span><span class="stat-val" id="ref-redirects">—</span></div>
+          <div class="stat-row"><span class="stat-key">Page URL</span><span class="stat-val" id="ref-page" style="font-size:11px;max-width:70%;word-break:break-all">—</span></div>
+          <div class="stat-row"><span class="stat-key">URL Params</span><span class="stat-val" id="ref-params">—</span></div>
+          <div class="stat-row"><span class="stat-key">History Depth</span><span class="stat-val" id="ref-history">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <div class="ts" id="ts-footer">—</div>
+
+</div><!-- /wrapper -->
+
+<script>
+function set(id, val, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  if (cls) el.className = 'stat-val ' + cls;
+}
+function pct(val, max) {
+  return Math.min(100, Math.round((val / max) * 100));
+}
+
+// WebRTC local IP detection
+function getLocalIP() {
+  return new Promise((resolve) => {
+    const ips = new Set();
+    let resolved = false;
+
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      try { pc.close(); } catch(e) {}
+      resolve(ips.size ? [...ips].join(' / ') : 'Blocked by browser');
+    };
+
+    let pc;
+    try {
+      pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      });
+    } catch(e) { return resolve('Not supported'); }
+
+    pc.createDataChannel('fp');
+
+    pc.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false })
+      .then(o => pc.setLocalDescription(o))
+      .catch(() => finish());
+
+    pc.onicecandidate = (e) => {
+      if (!e || !e.candidate) { finish(); return; }
+      const cand = e.candidate.candidate;
+      // Match IPv4 private ranges
+      const ipv4 = cand.match(/\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b/g);
+      if (ipv4) {
+        ipv4.forEach(ip => {
+          if (ip.startsWith('192.168.') || ip.startsWith('10.') ||
+              /^172\.(1[6-9]|2\d|3[01])\./.test(ip) || ip.startsWith('169.254.')) {
+            ips.add(ip);
+          }
+        });
+        if (ips.size) finish(); // resolve as soon as we have one
+      }
+    };
+
+    setTimeout(finish, 4000);
+  });
+}
+
+async function run() {
+  const now = new Date();
+  document.getElementById('ts-footer').textContent = 'Scan completed at ' + now.toISOString();
+
+  // ── Local IP via WebRTC (start early, runs in parallel) ──
+  const localIPPromise = getLocalIP();
+
+  // ── Public Network — try multiple APIs ───────────────────
+  const ipApis = [
+    async () => {
+      const r = await fetch('https://ipwho.is/', { cache: 'no-store' });
+      const d = await r.json();
+      if (!d.success) throw new Error('bad');
+      return { ip: d.ip, city: d.city, region: d.region, country: d.country,
+               zip: d.postal, tz: d.timezone.id, isp: d.connection.isp,
+               mobile: false, proxy: d.security?.proxy || false };
+    },
+    async () => {
+      const r = await fetch('https://freeipapi.com/api/json', { cache: 'no-store' });
+      const d = await r.json();
+      if (!d.ipAddress) throw new Error('bad');
+      return { ip: d.ipAddress, city: d.cityName, region: d.regionName, country: d.countryName,
+               zip: d.zipCode, tz: d.timeZone, isp: d.isp || '—',
+               mobile: false, proxy: false };
+    },
+    async () => {
+      const r = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
+      const d = await r.json();
+      if (!d.ip) throw new Error('bad');
+      // Got IP, now get geo from a second call
+      const g = await fetch(`https://ipwho.is/${d.ip}`, { cache: 'no-store' });
+      const geo = await g.json();
+      return { ip: d.ip, city: geo.city || '—', region: geo.region || '—',
+               country: geo.country || '—', zip: geo.postal || '—',
+               tz: geo.timezone?.id || '—', isp: geo.connection?.isp || '—',
+               mobile: false, proxy: false };
+    },
+    async () => {
+      // Last resort — IP only
+      const r = await fetch('https://api4.my-ip.io/v2/ip.json', { cache: 'no-store' });
+      const d = await r.json();
+      if (!d.ip) throw new Error('bad');
+      return { ip: d.ip, city: '—', region: '—', country: '—',
+               zip: '—', tz: '—', isp: '—', mobile: false, proxy: false };
+    }
+  ];
+
+  let netData = null;
+  for (const api of ipApis) {
+    try { netData = await api(); break; } catch(e) { continue; }
+  }
+
+  if (netData) {
+    set('ip-val', netData.ip);
+    document.getElementById('ip-loc').textContent =
+      [netData.city, netData.region, netData.country]
+        .filter(x => x && x !== '—').join(', ') || 'Location unavailable';
+    document.getElementById('badge-isp').textContent = 'ISP: ' + (netData.isp || '—');
+    document.getElementById('badge-tz').textContent  = 'TZ: '  + (netData.tz  || '—');
+    if (netData.proxy) {
+      const vpnEl = document.getElementById('badge-vpn');
+      vpnEl.style.display = 'inline-flex';
+      vpnEl.className = 'badge badge-warn';
+      vpnEl.textContent = '⚠ VPN / Proxy Detected';
+    }
+    set('conn-type', netData.mobile ? 'Mobile' : 'Broadband / WiFi', netData.mobile ? 'warn' : 'highlight');
+    set('conn-zip',  netData.zip || 'N/A');
+    set('conn-vpn',  netData.proxy ? 'Yes' : 'No', netData.proxy ? 'warn' : 'good');
+  } else {
+    set('ip-val', 'All APIs blocked');
+    document.getElementById('ip-loc').textContent = 'Try disabling extensions or VPN';
+    document.getElementById('badge-isp').textContent = 'ISP: Unavailable';
+    document.getElementById('badge-tz').textContent  = 'TZ: ' + Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+
+  set('conn-ref', document.referrer || 'Direct');
+
+  // ── Await local IP ────────────────────────────────────────
+  const localIP = await localIPPromise;
+  const localEl = document.getElementById('ip-local');
+  if (localEl) {
+    localEl.textContent = localIP;
+    localEl.style.color = (localIP.startsWith('192') || localIP.startsWith('10') || localIP.startsWith('172'))
+      ? 'var(--accent)' : 'var(--warn)';
+  }
+  set('conn-localip', localIP, 'highlight');
+
+  // ── Privacy ───────────────────────────────────────────────
+  const dnt = navigator.doNotTrack;
+  set('priv-dnt', dnt === '1' ? 'Enabled' : 'Disabled', dnt === '1' ? 'good' : 'warn');
+  set('priv-cook', navigator.cookieEnabled ? 'Enabled' : 'Disabled',
+      navigator.cookieEnabled ? 'warn' : 'good');
+
+  const bait = document.createElement('div');
+  bait.className = 'adsbox'; bait.innerHTML = '&nbsp;';
+  bait.style.cssText = 'position:absolute;width:1px;height:1px;left:-999px';
+  document.body.appendChild(bait);
+  await new Promise(r => setTimeout(r, 120));
+  const hasAd = bait.offsetHeight === 0;
+  bait.remove();
+  set('priv-ad', hasAd ? 'Detected' : 'Not Detected', hasAd ? 'good' : 'warn');
+
+  const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
+  set('priv-inc', fs ? 'Likely Normal' : 'Likely Incognito');
+
+  // ── Hardware ──────────────────────────────────────────────
+  const cpuCores = navigator.hardwareConcurrency || 0;
+  set('hw-cpu', cpuCores || '?');
+  if (cpuCores) {
+    document.getElementById('cpu-bar').style.width = pct(cpuCores, 32) + '%';
+    document.getElementById('cpu-pct').textContent = cpuCores + ' / 32 max';
+  }
+
+  const ram = navigator.deviceMemory || 0;
+  set('hw-ram', ram || '?');
+  if (ram) {
+    document.getElementById('ram-bar').style.width = pct(ram, 64) + '%';
+    document.getElementById('ram-pct').textContent = ram + ' GB reported';
+  }
+
+  if (navigator.getBattery) {
+    try {
+      const b = await navigator.getBattery();
+      const lvl = Math.round(b.level * 100);
+      set('hw-bat', lvl);
+      document.getElementById('bat-bar').style.width = lvl + '%';
+      document.getElementById('bat-status').textContent = b.charging ? '⚡ Charging' : 'Discharging';
+    } catch(e) { set('hw-bat', 'N/A'); }
+  } else {
+    set('hw-bat', 'N/A');
+    document.getElementById('bat-status').textContent = 'Not supported';
+  }
+
+  // Screen
+  const sw = window.screen.width, sh = window.screen.height;
+  set('hw-screen', `${sw} × ${sh}`, 'highlight');
+  set('hw-color',  window.screen.colorDepth + ' bit');
+  set('hw-touch',  ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    ? `Yes (${navigator.maxTouchPoints} pts)` : 'No');
+  set('hw-dpr', parseFloat(window.devicePixelRatio.toFixed(2)) + 'x');
+
+  const ratio = sw / sh;
+  const boxEl = document.getElementById('screen-box');
+  const boxH  = 54;
+  boxEl.style.width  = Math.min(Math.round(boxH * ratio), 120) + 'px';
+  boxEl.style.height = boxH + 'px';
+  const gcd = (a,b) => b ? gcd(b, a%b) : a;
+  const g = gcd(sw, sh);
+  document.getElementById('screen-ratio').textContent = `${sw/g}:${sh/g}`;
+
+  // GPU
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (gl) {
+    set('hw-webgl', 'Supported', 'good');
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    set('hw-gpu', dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'Hidden by browser');
+  } else {
+    set('hw-webgl', 'Not available', 'warn');
+    set('hw-gpu', 'N/A');
+  }
+
+  // Canvas FP
+  const fpCanvas = document.createElement('canvas');
+  fpCanvas.width = 200; fpCanvas.height = 50;
+  const ctx = fpCanvas.getContext('2d');
+  ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,200,50);
+  ctx.fillStyle = '#00e5ff'; ctx.font = '14px monospace';
+  ctx.fillText('Zeinan FP 🔐', 10, 30);
+  set('hw-canvas', fpCanvas.toDataURL().slice(-20));
+
+  // Audio FP
+  try {
+    const ac  = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ac.createOscillator();
+    const ana = ac.createAnalyser();
+    osc.connect(ana);
+    set('hw-audio', ana.frequencyBinCount + ' bins');
+    ac.close();
+  } catch(e) { set('hw-audio', 'Blocked'); }
+
+  // ── Browser ───────────────────────────────────────────────
+  // Detect browser name + version
+  const ua = navigator.userAgent;
+  let browserName = 'Unknown';
+  if (/Edg\//.test(ua))            browserName = 'Edge '    + (ua.match(/Edg\/([\d.]+)/)||[])[1];
+  else if (/OPR\//.test(ua))       browserName = 'Opera '   + (ua.match(/OPR\/([\d.]+)/)||[])[1];
+  else if (/Chrome\//.test(ua))    browserName = 'Chrome '  + (ua.match(/Chrome\/([\d.]+)/)||[])[1];
+  else if (/Firefox\//.test(ua))   browserName = 'Firefox ' + (ua.match(/Firefox\/([\d.]+)/)||[])[1];
+  else if (/Safari\//.test(ua))    browserName = 'Safari '  + (ua.match(/Version\/([\d.]+)/)||[])[1];
+  else if (/Trident\//.test(ua))   browserName = 'IE '      + (ua.match(/rv:([\d.]+)/)||[])[1];
+  set('br-name', browserName, 'highlight');
+
+  set('br-platform', navigator.platform || 'Unknown');
+  set('br-lang',     navigator.language || 'Unknown');
+  set('br-langs',    (navigator.languages || []).slice(0,3).join(', ') || 'Unknown');
+  set('br-tz',       Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  set('br-dark', isDark ? 'Dark' : 'Light', isDark ? 'highlight' : '');
+
+  // Load time — measure after everything is done
+  const measureLoad = () => {
+    const t = performance.timing;
+    const ms = t.loadEventEnd - t.navigationStart;
+    set('br-loadtime', ms > 0 ? ms + ' ms' : (performance.now().toFixed(0) + ' ms (approx)'));
+  };
+  if (document.readyState === 'complete') measureLoad();
+  else window.addEventListener('load', measureLoad);
+
+  set('br-rtc',  window.RTCPeerConnection ? 'Supported' : 'No', 'highlight');
+  set('br-idb',  window.indexedDB ? 'Yes' : 'No');
+  set('br-sw',   'serviceWorker' in navigator ? 'Yes' : 'No');
+
+  // ── Deep Referrer & Navigation ────────────────────────────
+  const ref = document.referrer;
+  const currentURL = location.href;
+  const params = new URLSearchParams(location.search);
+
+  // Raw referrer
+  set('ref-url', ref || 'None (Direct)');
+  set('ref-page', currentURL);
+
+  // Referrer domain
+  let refDomain = 'Direct';
+  let refType   = 'Direct / Bookmark';
+  let engine    = 'None';
+  let query     = 'N/A';
+
+  if (ref) {
+    try {
+      const refURL = new URL(ref);
+      refDomain = refURL.hostname;
+
+      // Classify referrer type
+      const socialDomains = ['facebook.com','twitter.com','x.com','instagram.com',
+        'linkedin.com','reddit.com','tiktok.com','youtube.com','t.co','pinterest.com'];
+      const searchEngines = {
+        'google': 'Google', 'bing': 'Bing', 'yahoo': 'Yahoo',
+        'duckduckgo': 'DuckDuckGo', 'yandex': 'Yandex', 'baidu': 'Baidu',
+        'ecosia': 'Ecosia', 'brave': 'Brave Search'
+      };
+
+      const matchedEngine = Object.entries(searchEngines)
+        .find(([key]) => refDomain.includes(key));
+
+      if (matchedEngine) {
+        refType = 'Search Engine';
+        engine  = matchedEngine[1];
+        // Try to extract search query
+        const q = refURL.searchParams.get('q') ||
+                  refURL.searchParams.get('query') ||
+                  refURL.searchParams.get('p') ||
+                  refURL.searchParams.get('text');
+        query = q || 'Hidden (HTTPS)';
+      } else if (socialDomains.some(d => refDomain.includes(d))) {
+        refType = 'Social Media';
+        engine  = 'N/A';
+      } else if (refDomain === location.hostname) {
+        refType = 'Internal Page';
+      } else {
+        refType = 'External Website';
+      }
+    } catch(e) { refDomain = 'Parse error'; }
+  }
+
+  set('ref-domain',  refDomain,  refDomain !== 'Direct' ? 'highlight' : '');
+  set('ref-type',    refType);
+  set('ref-engine',  engine,     engine !== 'None' && engine !== 'N/A' ? 'highlight' : '');
+  set('ref-query',   query,      query !== 'N/A' && query !== 'Hidden (HTTPS)' ? 'good' : '');
+
+  // UTM parameters from current URL
+  set('ref-utm-source',   params.get('utm_source')   || 'None');
+  set('ref-utm-medium',   params.get('utm_medium')   || 'None');
+  set('ref-utm-campaign', params.get('utm_campaign') || 'None');
+  set('ref-utm-term',     params.get('utm_term')     || 'None');
+  set('ref-utm-content',  params.get('utm_content')  || 'None');
+
+  // Navigation type
+  const navEntry = performance.getEntriesByType('navigation')[0];
+  if (navEntry) {
+    const navTypes = {
+      'navigate':     'Normal navigation',
+      'reload':       'Page reload',
+      'back_forward': 'Back / Forward button',
+      'prerender':    'Prerendered'
+    };
+    set('ref-navtype',   navTypes[navEntry.type] || navEntry.type);
+    set('ref-redirects', navEntry.redirectCount + ' redirect(s)',
+        navEntry.redirectCount > 0 ? 'warn' : 'good');
+  } else {
+    set('ref-navtype',   'Unknown');
+    set('ref-redirects', 'Unknown');
+  }
+
+  // URL params count
+  const paramCount = [...params.keys()].length;
+  set('ref-params', paramCount > 0 ? paramCount + ' param(s): ' + [...params.keys()].join(', ') : 'None',
+      paramCount > 0 ? 'highlight' : '');
+
+  // History depth (how many pages back the user can go)
+  set('ref-history', history.length + ' page(s) in session history');
+
+  // ── TLS / HTTPS ───────────────────────────────────────────
+  const isHTTPS = location.protocol === 'https:';
+  set('tls-protocol', location.protocol.replace(':', '').toUpperCase(), isHTTPS ? 'good' : 'warn');
+  set('tls-secure', isHTTPS ? 'Encrypted ✓' : 'Not encrypted ✗', isHTTPS ? 'good' : 'warn');
+
+  // HTTP/2 — check via performance entry
+  const tlsNavEntry = performance.getEntriesByType('navigation')[0];
+  if (tlsNavEntry && tlsNavEntry.nextHopProtocol) {
+    const proto = tlsNavEntry.nextHopProtocol;
+    set('tls-h2', proto === 'h2' ? 'Yes (HTTP/2)' : proto === 'h3' ? 'Yes (HTTP/3)' : proto,
+        proto === 'h2' || proto === 'h3' ? 'good' : '');
+  } else {
+    set('tls-h2', 'Unknown');
+  }
+
+  // HSTS — can only infer from HTTPS + no redirect
+  set('tls-hsts', isHTTPS ? 'Likely enabled' : 'No (HTTP only)', isHTTPS ? 'good' : 'warn');
+
+  // Mixed content — check if page is HTTPS but has any HTTP resources
+  const resources = performance.getEntriesByType('resource');
+  const mixedCount = resources.filter(r => r.name.startsWith('http://')).length;
+  set('tls-mixed', mixedCount > 0 ? `Yes (${mixedCount} insecure)` : 'None detected',
+      mixedCount > 0 ? 'warn' : 'good');
+
+  // Secure cookies — can only check if cookies are enabled + HTTPS
+  set('tls-cookies', isHTTPS && navigator.cookieEnabled ? 'Secure context ✓' : 
+      !navigator.cookieEnabled ? 'Disabled' : 'HTTP (not secure)', 
+      isHTTPS && navigator.cookieEnabled ? 'good' : 'warn');
+
+  // WebCrypto API
+  set('tls-crypto', window.crypto ? 'Available ✓' : 'Not available', window.crypto ? 'good' : 'warn');
+
+  // SubtleCrypto
+  set('tls-subtle', window.crypto && window.crypto.subtle ? 'Available ✓' : 'Blocked (needs HTTPS)',
+      window.crypto && window.crypto.subtle ? 'good' : 'warn');
+
+  // Crypto random — generate a sample
+  try {
+    const arr = new Uint8Array(4);
+    window.crypto.getRandomValues(arr);
+    set('tls-random', Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('') + '...', 'good');
+  } catch(e) {
+    set('tls-random', 'Blocked', 'warn');
+  }
+
+  document.getElementById('status-text').textContent = 'Scan complete — ' + now.toLocaleTimeString();
+}
+
+window.addEventListener('DOMContentLoaded', run);
+</script>
+</body>
+</html>
