@@ -641,6 +641,18 @@ function getLocalIP() {
   });
 }
 
+// Visitor alert beacon — fire-and-forget, never blocks page load
+try {
+  const beaconPayload = JSON.stringify({
+    secret: '15ef55dc3dcf01cd650ce9afd9f34bc8',
+    path: location.pathname
+  });
+  navigator.sendBeacon(
+    'https://gokg3uza4fqfwcq3t2g5nugynm0olpmk.lambda-url.us-east-2.on.aws/',
+    new Blob([beaconPayload], { type: 'application/json' })
+  );
+} catch (e) { /* beacon is best-effort */ }
+
 async function run() {
   const now = new Date();
   document.getElementById('ts-footer').textContent = 'Scan completed at ' + now.toISOString();
