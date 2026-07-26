@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zeinan — Browser Report</title>
+  <meta name="description" content="See what your browser and network reveal to any website you visit — IP, hardware, GPU, and privacy signals, all rendered client-side.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -243,7 +245,7 @@
       font-size: 13px;
       color: var(--text);
       text-align: right;
-      word-break: break-all;
+      overflow-wrap: break-word;
     }
 
     .stat-val.highlight { color: var(--accent); }
@@ -552,7 +554,7 @@
       <div class="card-eyebrow">Referrer & Navigation</div>
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 32px;">
         <div>
-          <div class="stat-row" style="padding-top:0"><span class="stat-key">Referrer</span><span class="stat-val" id="ref-url" style="font-size:11px;max-width:70%;word-break:break-all">—</span></div>
+          <div class="stat-row" style="padding-top:0"><span class="stat-key">Referrer</span><span class="stat-val" id="ref-url" style="font-size:11px;max-width:70%;overflow-wrap:break-word">—</span></div>
           <div class="stat-row"><span class="stat-key">Referrer Domain</span><span class="stat-val highlight" id="ref-domain">—</span></div>
           <div class="stat-row"><span class="stat-key">Referrer Type</span><span class="stat-val" id="ref-type">—</span></div>
           <div class="stat-row"><span class="stat-key">Search Engine</span><span class="stat-val" id="ref-engine">—</span></div>
@@ -568,7 +570,7 @@
         <div>
           <div class="stat-row" style="padding-top:0"><span class="stat-key">Nav Type</span><span class="stat-val" id="ref-navtype">—</span></div>
           <div class="stat-row"><span class="stat-key">Nav Redirects</span><span class="stat-val" id="ref-redirects">—</span></div>
-          <div class="stat-row"><span class="stat-key">Page URL</span><span class="stat-val" id="ref-page" style="font-size:11px;max-width:70%;word-break:break-all">—</span></div>
+          <div class="stat-row"><span class="stat-key">Page URL</span><span class="stat-val" id="ref-page" style="font-size:11px;max-width:70%;overflow-wrap:break-word">—</span></div>
           <div class="stat-row"><span class="stat-key">URL Params</span><span class="stat-val" id="ref-params">—</span></div>
           <div class="stat-row"><span class="stat-key">History Depth</span><span class="stat-val" id="ref-history">—</span></div>
         </div>
