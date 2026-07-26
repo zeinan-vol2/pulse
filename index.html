@@ -743,8 +743,17 @@ async function run() {
   bait.remove();
   set('priv-ad', hasAd ? 'Detected' : 'Not Detected', hasAd ? 'good' : 'warn');
 
-  const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
-  set('priv-inc', fs ? 'Likely Normal' : 'Likely Incognito');
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const { quota } = await navigator.storage.estimate();
+      // Private/incognito sessions typically cap storage quota far below normal browsing
+      set('priv-inc', quota < 120000000 ? 'Likely Private/Incognito' : 'Likely Normal');
+    } else {
+      set('priv-inc', 'Unknown (unsupported)');
+    }
+  } catch (e) {
+    set('priv-inc', 'Unknown');
+  }
 
   // ── Hardware ──────────────────────────────────────────────
   const cpuCores = navigator.hardwareConcurrency || 0;
@@ -844,8 +853,8 @@ async function run() {
 
   // Load time — measure after everything is done
   const measureLoad = () => {
-    const t = performance.timing;
-    const ms = t.loadEventEnd - t.navigationStart;
+    const nav = performance.getEntriesByType('navigation')[0];
+    const ms = nav ? Math.round(nav.loadEventEnd - nav.startTime) : 0;
     set('br-loadtime', ms > 0 ? ms + ' ms' : (performance.now().toFixed(0) + ' ms (approx)'));
   };
   if (document.readyState === 'complete') measureLoad();
