@@ -649,7 +649,7 @@ try {
   });
   navigator.sendBeacon(
     'https://gokg3uza4fqfwcq3t2g5nugynm0olpmk.lambda-url.us-east-2.on.aws/',
-    new Blob([beaconPayload], { type: 'application/json' })
+    new Blob([beaconPayload], { type: 'text/plain' })
   );
 } catch (e) { /* beacon is best-effort */ }
 
