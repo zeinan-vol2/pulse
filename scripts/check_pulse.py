@@ -26,6 +26,7 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
@@ -70,13 +71,24 @@ def http_json(url, method="GET", body=None):
         return json.loads(resp.read().decode("utf-8"))
 
 
+def _split_target(url):
+    """Globalping's `target` must be a bare hostname, not a full URL —
+    the protocol and path go in measurementOptions instead."""
+    if "://" not in url:
+        url = "https://" + url
+    parsed = urllib.parse.urlparse(url)
+    return parsed.hostname, (parsed.scheme or "https").upper(), (parsed.path or "/")
+
+
 def create_measurement(magic_location):
+    hostname, protocol, path = _split_target(TARGET_URL)
     body = {
-        "target": TARGET_URL,
+        "target": hostname,
         "type": "http",
         "locations": [{"magic": magic_location, "limit": 1}],
         "measurementOptions": {
-            "request": {"method": "HEAD"},
+            "protocol": protocol,
+            "request": {"method": "HEAD", "path": path},
         },
     }
     return http_json(GLOBALPING_API, method="POST", body=body)
