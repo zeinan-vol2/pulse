@@ -61,10 +61,10 @@ REGION_WARN_MS = {
     'us-west-1':      150,
     'eu-west-1':      200,
     'eu-central-1':   200,
-    'me-south-1':     250,
-    'ap-southeast-1': 250,
-    'ap-southeast-2': 250,
-    'sa-east-1':      250,
+    'me-south-1':     200,
+    'ap-southeast-1': 200,
+    'ap-southeast-2': 200,
+    'sa-east-1':      200,
 }
 DEFAULT_WARN_MS = 200  # fallback for any region not listed above
 DOWN_ABOVE_MS = 3000  # effectively unreachable / timed out territory, same for all regions
