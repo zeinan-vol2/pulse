@@ -937,17 +937,26 @@
 
   // legend
   const legendEl = document.getElementById('legend');
-  REGIONS.forEach(r => {
-    legendEl.innerHTML += `<span><i style="background:${r.color}"></i>${r.tag}</span>`;
+  const legendItems = REGIONS.map((r, i) => {
+    const el = document.createElement('span');
+    el.innerHTML = `<i style="background:${r.color}"></i>${r.tag}`;
+    el.dataset.idx = i;
+    legendEl.appendChild(el);
+    return el;
   });
 
-  new Chart(document.getElementById('latencyChart'), {
+  const canvasEl = document.getElementById('latencyChart');
+  const chart = new Chart(canvasEl, {
     type: 'line',
     data: { labels: chartLabels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
+      onHover: (evt) => {
+        const els = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: false }, true);
+        setHighlight(els.length ? els[0].datasetIndex : null);
+      },
       plugins: { legend: { display: false }, tooltip: {
         backgroundColor: '#171b21', borderColor: '#21262e', borderWidth: 1,
         titleFont: { family: 'IBM Plex Mono', size: 11 },
@@ -959,6 +968,40 @@
         y: { grid: { color: '#171b21' }, ticks: { color: '#4b525a', font: { family:'IBM Plex Mono', size: 10 } }, title: { display:true, text:'ms', color:'#4b525a', font:{ family:'IBM Plex Mono', size:10 } } }
       }
     }
+  });
+
+  // ---------- Hover highlight ----------
+  // Ten overlapping lines are unreadable at a glance, so hovering one (on the
+  // chart or in the legend) keeps it at full strength and fades the rest.
+  const baseColors = datasets.map(d => d.borderColor);
+  function dim(hex, alpha){
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  let highlighted = null;
+  function setHighlight(idx){
+    if (highlighted === idx) return;
+    highlighted = idx;
+    chart.data.datasets.forEach((ds, i) => {
+      const isFocus = idx !== null && i === idx;
+      const isFaded = idx !== null && i !== idx;
+      ds.borderColor = isFaded ? dim(baseColors[i], 0.13) : baseColors[i];
+      ds.borderWidth = isFocus ? 3 : 1.75;
+      ds.order = isFocus ? -1 : 0;
+    });
+    legendItems.forEach((el, i) => {
+      el.style.opacity = (idx !== null && i !== idx) ? '0.3' : '1';
+    });
+    chart.update('none');
+  }
+  canvasEl.addEventListener('mouseleave', () => setHighlight(null));
+  legendItems.forEach((el, i) => {
+    el.style.cursor = 'default';
+    el.addEventListener('mouseenter', () => setHighlight(i));
+    el.addEventListener('mouseleave', () => setHighlight(null));
   });
 
   // ---------- Event log ----------
