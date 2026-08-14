@@ -271,6 +271,12 @@
   .legend i { width: 9px; height: 2px; display: inline-block; }
 
   .chart-holder { height: 260px; }
+  .utc-hint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: right;
+  }
 
   /* ---------- Health checks row ---------- */
   .health-cards {
@@ -629,6 +635,7 @@
       <div class="legend" id="legend"></div>
     </div>
     <div class="chart-holder"><canvas id="latencyChart"></canvas></div>
+    <div class="utc-hint" id="utcHint"></div>
   </div>
 
   <div class="section-title">Event log</div>
@@ -703,6 +710,14 @@
   }
   tickClock();
   setInterval(tickClock, 1000);
+
+  // ---------- UTC hint ----------
+  // Chart and event log timestamps below are all server-side UTC — this
+  // spells out the viewer'''s own offset so they don'''t have to guess.
+  const utcOffsetHours = -new Date().getTimezoneOffset() / 60;
+  const utcOffsetLabel = (utcOffsetHours >= 0 ? '+' : '') + utcOffsetHours;
+  document.getElementById('utcHint').textContent =
+    `times below are UTC · your local offset is UTC${utcOffsetLabel}`;
 
   // ---------- Overall status ----------
   const overall = REGIONS.some(r => r.status === 'down') ? 'down'
@@ -972,7 +987,7 @@
       const cls = e.kind === 'down' ? 'r-down' : e.kind === 'warn' ? 'r-warn' : 'r-good';
       const div = document.createElement('div');
       div.className = 'log-line';
-      div.innerHTML = `<span class="t">[${e.t}]</span> <span class="${cls}">${e.region}</span> · ${e.text}`;
+      div.innerHTML = `<span class="t">[${e.t} UTC]</span> <span class="${cls}">${e.region}</span> · ${e.text}`;
       logEl.appendChild(div);
     });
   }
