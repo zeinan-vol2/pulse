@@ -69,7 +69,7 @@ REGION_WARN_MS = {
 DEFAULT_WARN_MS = 200  # fallback for any region not listed above
 DOWN_ABOVE_MS = 3000  # effectively unreachable / timed out territory, same for all regions
 
-HISTORY_MAX_POINTS = 48
+HISTORY_MAX_POINTS = 48  # at hourly runs, this is ~2 days of history
 EVENTS_MAX = 30
 POLL_INTERVAL_S = 1.5
 POLL_MAX_TRIES = 12

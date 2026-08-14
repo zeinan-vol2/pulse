@@ -2,13 +2,12 @@ name: pulse check
 
 on:
   schedule:
-    # every 10 minutes, offset from :00/:30 — those are GitHub's peak-load
-    # minutes (top and half of every hour), so scheduled runs there see the
-    # worst delays. Landing on :07/:17/... instead avoids the worst of it.
-    # (Globalping's free anonymous quota, ~250 tests/hour, is shared across
-    # GitHub's runner IPs — add a GLOBALPING_TOKEN secret for a dedicated
-    # quota if you ever want to schedule tighter than this.)
-    - cron: '7,17,27,37,47,57 * * * *'
+    # once an hour, at :07 rather than :00 — :00 is GitHub's peak-load
+    # minute (top of every hour), so scheduled runs there see the worst
+    # delays. This also keeps us comfortably under CloudFront'''s 1,000
+    # free invalidation paths/month (720 runs/month at hourly vs. 4,320
+    # at every-10-minutes, which was already over the free tier).
+    - cron: '7 * * * *'
   workflow_dispatch: {}
 
 # Requires, in this repo's Settings → Secrets and variables → Actions:
