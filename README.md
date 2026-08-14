@@ -1,71 +1,50 @@
 # zeinan.fyi
 
-Двухстраничный сайт: `report` — что браузер и сеть знают о посетителе, и `tel` — дашборд сетевой телеметрии. Переключение между ними — через терминал-навигацию наверху обеих страниц.
+A two-page site: `report` — what your browser and network reveal about you, and `tel` — a network telemetry dashboard. The two pages are linked by a terminal-style nav widget at the top of both.
 
-## Структура репозитория
+## Repository structure
 
-```
-index.html                        — страница report (zeinan/report)
-pulse.html                        — страница tel (zeinan/tel), дашборд
-data/pulse-status.json            — данные телеметрии, пишет их коллектор
-scripts/check_pulse.py            — скрипт-коллектор (использует Globalping)
-.github/workflows/pulse-check.yml — расписание: гоняет коллектор и льёт данные в S3
-.github/workflows/deploy-site.yml — по пушу в main: льёт index.html/pulse.html в S3
-aws-iam-policy.json               — политика для AWS-пользователя, которым пользуются оба воркфлоу
-```
+ndex.html — report page (zeinan/report)
+pulse.html — tel page (zeinan/tel), the dashboard
+data/pulse-status.json — telemetry data, written by the collector
+scripts/check_pulse.py — collector script (uses Globalping)
+.github/workflows/pulse-check.yml — schedule: runs the collector and pushes data to S3
+.github/workflows/deploy-site.yml — on push to main: pushes index.html/pulse.html to S3
+aws-iam-policy.json — IAM policy for the AWS user both workflows use
 
-Всё из архива коллектора должно лежать в корне репозитория ровно по этим путям — и `pulse.html` в самом бакете тоже подгружает данные относительным путём `data/pulse-status.json`, так что раскладка папок в S3 должна повторять раскладку в репозитории.
+Everything from the collector archive needs to live at the repo root, at exactly these paths — `pulse.html`, once deployed, also fetches its data via the relative path `data/pulse-status.json`, so the folder layout in S3 has to mirror the one in the repo.
 
-## Терминал-навигация
+## Nav terminal
 
-Блок наверху обеих страниц — маленький терминал: вводите `report` или `tel` (или кликаете по чипам `./report` / `./tel`), он проигрывает короткую анимацию подключения и переходит на соответствующую страницу через `window.location.href`. Промпт вида `guest-XXXX@zeinan.fyi` берёт последние 4 цифры реального IP посетителя через `api.ipify.org`; если запрос не прошёл — подставляется случайное число.
+The block at the top of both pages is a small terminal: type `report` or `tel` (or click the `./report` / `./tel` chips), and it plays a short connection animation before navigating to the matching page via `window.location.href`. The prompt — `guest-XXXX@zeinan.fyi` — takes the last 4 digits of the visitor's real IP from `api.ipify.org`.
 
-## Как устроена телеметрия (`tel`)
+## How the telemetry (`tel`) works
 
-`pulse.html` при загрузке пытается получить `data/pulse-status.json`. Если файл есть и в нём есть `generated_at` — используются реальные данные, в шапке появляется зелёная точка «live · updated Xm ago». Если файла нет, или он не отдаётся (например, вы открыли файл двойным кликом локально, без сервера) — страница тихо откатывается на демо-данные и честно показывает «demo data · collector not connected yet». Ничего не ломается ни в том, ни в другом случае.
+The data is written by `scripts/check_pulse.py`, run on a schedule by `.github/workflows/pulse-check.yml` (every 10 minutes). The script:
 
-Данные пишет `scripts/check_pulse.py` по расписанию из `.github/workflows/pulse-check.yml` (каждые 10 минут). Скрипт:
+- for each of the 10 regions, runs an HTTP measurement through the free [Globalping](https://globalping.io) API from a probe near that region (a `magic` location like `us-east-1`), and pulls the response time (TTFB) and HTTP status;
+- while it's at it, also pulls the TLS certificate (expiry, issuer) and DNS resolution time from one of those same measurements — no separate request needed;
+- compares each region's status against the previous run and, if it changed, adds a line to the event log;
+- keeps a short rolling history of TTFB for the chart, and counters for "how many checks in a row succeeded" to compute an uptime percentage (this isn't a real 30-day SLA number, just tracking since the collector started — the UI is honest about this and labels it "trk" rather than "30d");
+- writes everything to `data/pulse-status.json` and commits the file back to the repo.
 
-- для каждого из 10 регионов запускает HTTP-замер через бесплатный API [Globalping](https://globalping.io) из пробы рядом с этим регионом (`magic`-локация вроде `us-east-1`) и достаёт время ответа (TTFB), HTTP-статус;
-- заодно достаёт TLS-сертификат (срок действия, издатель) и время DNS-резолвинга из одного из замеров — отдельный запрос под это не нужен;
-- сравнивает статус региона с предыдущим запуском и, если он поменялся, добавляет строку в журнал событий;
-- копит короткую историю TTFB на график и счётчики «сколько проверок подряд были успешными» для процента аптайма (это не настоящий 30-дневный SLA, а просто с момента, как коллектор начал работать — в интерфейсе это честно подписано как «trk», а не «30d»);
-- пишет всё в `data/pulse-status.json` и коммитит файл обратно в репозиторий.
+## How delivery to the site works
 
-## Как устроена доставка на сайт
+`zeinan.fyi` is hosted on S3, and DNS points there. GitHub is the source of truth for code and data, but doesn't serve anything to visitors on its own — two workflows push changes through to the bucket:
 
-Сайт `zeinan.fyi` живёт на S3, DNS указывает туда же. GitHub — источник правды для кода и данных, но сам по себе ничего не показывает посетителям; два воркфлоу докладывают изменения до бакета:
+- **`pulse-check.yml`** (scheduled, every 10 minutes) — after the collector updates `data/pulse-status.json` and commits it to the repo, the same run uploads that file to `s3://<bucket>/data/pulse-status.json`.
+- **`deploy-site.yml`** (on push to `main`) — only triggers when `index.html` or `pulse.html` change, and uploads them to the bucket. It ignores the pulse-bot's data-only commits — the trigger paths are scoped specifically to those two files.
 
-- **`pulse-check.yml`** (расписание, каждые 10 минут) — после того как коллектор обновил `data/pulse-status.json` и закоммитил его в репозиторий, тем же прогоном заливает этот файл в `s3://<бакет>/data/pulse-status.json`.
-- **`deploy-site.yml`** (по пушу в `main`) — срабатывает только когда меняются `index.html` или `pulse.html`, заливает их в бакет. На коммиты pulse-бота с одними только данными этот воркфлоу не реагирует — там указаны конкретные пути-триггеры.
 
-### Настройка AWS
+### Optional: Globalping token
 
-1. В IAM создайте отдельного пользователя только под этот пайплайн (не переиспользуйте личные ключи с широкими правами).
-2. Прикрепите ему политику из `aws-iam-policy.json` — она даёт право писать только в три конкретных файла в бакете. Замените в ней `YOUR_BUCKET_NAME` на имя вашего бакета.
-3. Создайте ему Access key (тип — "Application running outside AWS" / программный доступ).
-4. В репозитории: **Settings → Secrets and variables → Actions**
-   - вкладка **Secrets**: добавьте `AWS_ACCESS_KEY_ID` и `AWS_SECRET_ACCESS_KEY` из шага 3;
-   - вкладка **Variables**: добавьте `AWS_S3_BUCKET` (имя бакета) и, если регион не `us-east-1`, ещё `AWS_REGION`.
-5. Если бакет отдаёт сайт через CloudFront с кэшем — после деплоя может понадобиться инвалидация кэша; это не входит в текущие воркфлоу, скажите, если нужно, добавлю отдельным шагом.
+Globalping's free anonymous access is roughly 250 tests/hour, but that quota is shared across the GitHub runner's IP, which many other jobs use too. If the collector starts failing on rate limits often:
 
-## Настройка после первого пуша
+1. Sign up at [dash.globalping.io](https://dash.globalping.io) (free).
+2. Copy the token and add it to the repo as a secret: **Settings → Secrets and variables → Actions → New repository secret**, named `GLOBALPING_TOKEN`.
+3. The script picks it up automatically on the next run — the quota becomes dedicated to you instead of shared by IP.
 
-1. Убедитесь, что репозиторий **публичный** — на приватном GitHub Actions ограничены 2000 минутами в месяц бесплатно, а сборщик гоняется каждые 10 минут, этого не хватит. Сам сайт хостится на S3, так что видимость репозитория на него не влияет.
-2. Зайдите в **Settings → Actions → General** и проверьте, что экшенам разрешено запускаться и делать коммиты (Workflow permissions → Read and write permissions).
-3. Настройте AWS-секреты и переменные, как описано выше.
-4. Экшен `pulse check` запустится сам по расписанию, либо запустите вручную: вкладка **Actions → pulse check → Run workflow**.
-5. После первого успешного запуска в репозитории должен появиться закоммиченный `data/pulse-status.json` с непустым `generated_at`, а в бакете — обновлённый файл по тому же пути; на сайте это будет видно по зелёной точке «live».
+## Known limitations
 
-### Опционально: свой токен Globalping
-
-Бесплатный анонимный доступ Globalping — около 250 тестов в час, но лимит общий на IP гитхабовского раннера, который делят между собой много чужих задач. Если сборщик начнёт часто падать по лимиту:
-
-1. Зарегистрируйтесь на [dash.globalping.io](https://dash.globalping.io) (бесплатно).
-2. Скопируйте токен и добавьте его в репозитории как секрет **Settings → Secrets and variables → Actions → New repository secret**, имя — `GLOBALPING_TOKEN`.
-3. Скрипт подхватит его автоматически при следующем запуске — лимит станет персональным, а не общим на IP.
-
-## Известные ограничения
-
-- У некоторых регионов (например, `me-south-1`, `sa-east-1`) в сети Globalping не так много проб — если пробу подобрать не удалось, регион помечается статусом `down` с пометкой `no probe` вместо падения всего скрипта.
-- История на графике — не «последние 24 часа» в буквальном смысле, а последние ~48 замеров подряд (при интервале в 10 минут это порядка 8 часов); заголовок графика меняется на «recent checks», когда используются реальные данные, чтобы не вводить в заблуждение.
+- Some regions (e.g. `me-south-1`, `sa-east-1`) have thinner probe coverage on Globalping's network — if no probe can be matched, that region is marked `down` with `no probe` instead of crashing the whole script.
+- The chart history isn't literally "the last 24 hours" — it's the last ~48 checks in a row (at a 10-minute interval, that's roughly 8 hours); the chart title switches to "recent checks" when real data is in use, so it doesn't overstate what it's showing.
