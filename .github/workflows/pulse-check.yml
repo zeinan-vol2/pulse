@@ -53,7 +53,11 @@ jobs:
             echo "no changes to commit"
           else
             git commit -m "pulse: update telemetry data [skip ci]"
-            git push
+            for i in 1 2 3; do
+              git push && break
+              echo "push rejected (attempt $i/3), pulling and retrying..."
+              git pull --rebase origin main
+            done
           fi
 
       - name: Configure AWS credentials
