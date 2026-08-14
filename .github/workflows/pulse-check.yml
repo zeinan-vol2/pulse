@@ -12,7 +12,8 @@ on:
 
 # Requires, in this repo's Settings → Secrets and variables → Actions:
 #   Secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY  (IAM user, see README)
-#   Variables: AWS_S3_BUCKET (bucket name), AWS_REGION (optional, defaults to us-east-1)
+#   Variables: AWS_S3_BUCKET (bucket name), AWS_REGION (optional, defaults to us-east-1),
+#              CLOUDFRONT_DISTRIBUTION_ID (optional — skip invalidation step if unset)
 #   Optional:  GLOBALPING_TOKEN secret for a higher, dedicated rate limit
 
 permissions:
@@ -67,3 +68,10 @@ jobs:
           aws s3 cp data/pulse-status.json \
             "s3://${{ vars.AWS_S3_BUCKET }}/data/pulse-status.json" \
             --cache-control "no-cache, max-age=0"
+
+      - name: Invalidate CloudFront cache for data file
+        if: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/data/pulse-status.json"

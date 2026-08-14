@@ -10,7 +10,8 @@ on:
 
 # Requires, in this repo's Settings → Secrets and variables → Actions:
 #   Secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY  (IAM user, see README)
-#   Variables: AWS_S3_BUCKET (bucket name), AWS_REGION (optional, defaults to us-east-1)
+#   Variables: AWS_S3_BUCKET (bucket name), AWS_REGION (optional, defaults to us-east-1),
+#              CLOUDFRONT_DISTRIBUTION_ID (optional — skip invalidation step if unset)
 #
 # Only triggers on index.html / pulse.html changes — the pulse-bot's own
 # data-only commits (data/pulse-status.json) won't fire this workflow.
@@ -43,3 +44,10 @@ jobs:
           aws s3 cp pulse.html "s3://${{ vars.AWS_S3_BUCKET }}/pulse.html" \
             --content-type "text/html; charset=utf-8" \
             --cache-control "no-cache, max-age=0"
+
+      - name: Invalidate CloudFront cache
+        if: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/" "/index.html" "/pulse.html"
