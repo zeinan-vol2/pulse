@@ -8,9 +8,9 @@
         "s3:PutObject"
       ],
       "Resource": [
-        "arn:aws:s3:::YOUR_BUCKET_NAME/index.html",
-        "arn:aws:s3:::YOUR_BUCKET_NAME/pulse.html",
-        "arn:aws:s3:::YOUR_BUCKET_NAME/data/pulse-status.json"
+        "arn:aws:s3:::zeinan.fyi/index.html",
+        "arn:aws:s3:::zeinan.fyi/pulse.html",
+        "arn:aws:s3:::zeinan.fyi/data/pulse-status.json"
       ]
     }
   ]
