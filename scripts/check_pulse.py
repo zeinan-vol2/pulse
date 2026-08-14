@@ -167,7 +167,14 @@ def check_region(region):
             "tls": tls,
         }
     except urllib.error.HTTPError as e:
-        return {"code": code, "status": "down", "http_status": f"http {e.code}", "ttfb_ms": None}
+        label = f"http {e.code}"
+        try:
+            body = json.loads(e.read().decode("utf-8"))
+            if body.get("error", {}).get("type") == "no_probes_found":
+                label = "no probe"
+        except Exception:
+            pass
+        return {"code": code, "status": "down", "http_status": label, "ttfb_ms": None}
     except Exception as e:  # noqa: BLE001 — this is a scheduled job, must not hard-crash on one bad region
         return {"code": code, "status": "down", "http_status": "error", "ttfb_ms": None, "error": str(e)}
 
