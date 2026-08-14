@@ -634,13 +634,6 @@
   <div class="section-title">Event log</div>
   <div class="log-panel" id="logPanel"></div>
 
-  <footer>
-    <b>Как это устроено:</b> отдельный процесс на расписании (GitHub Actions, каждые ~10 минут) проверяет
-    зейнан.fyi из проб, близких к каждому региону, через <a href="https://globalping.io" target="_blank" rel="noopener">Globalping</a>,
-    и пишет результат в JSON-файл в репозитории — эта страница просто читает готовые данные при загрузке,
-    без дополнительной нагрузки на хостинг при каждом просмотре.
-  </footer>
-
 </div>
 
 <script>
