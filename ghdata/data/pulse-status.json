@@ -1,0 +1,25 @@
+{
+  "generated_at": null,
+  "target": "https://zeinan.fyi",
+  "overall": "good",
+  "tracking_started_at": null,
+  "global": {
+    "tls": { "days_left": 58, "issuer": "Let's Encrypt", "status": "good" },
+    "dns": { "ms": 4, "status": "good" }
+  },
+  "regions": {
+    "us-east-1":      { "status": "good", "http_status": "200", "ttfb_ms": 24,  "uptime_tracked_pct": null },
+    "us-east-2":      { "status": "good", "http_status": "200", "ttfb_ms": 29,  "uptime_tracked_pct": null },
+    "us-west-2":      { "status": "good", "http_status": "200", "ttfb_ms": 51,  "uptime_tracked_pct": null },
+    "us-west-1":      { "status": "good", "http_status": "200", "ttfb_ms": 55,  "uptime_tracked_pct": null },
+    "eu-west-1":      { "status": "good", "http_status": "200", "ttfb_ms": 39,  "uptime_tracked_pct": null },
+    "eu-central-1":   { "status": "good", "http_status": "200", "ttfb_ms": 33,  "uptime_tracked_pct": null },
+    "me-south-1":     { "status": "warn", "http_status": "200", "ttfb_ms": 240, "uptime_tracked_pct": null },
+    "ap-southeast-1": { "status": "good", "http_status": "200", "ttfb_ms": 96,  "uptime_tracked_pct": null },
+    "ap-southeast-2": { "status": "good", "http_status": "200", "ttfb_ms": 68,  "uptime_tracked_pct": null },
+    "sa-east-1":      { "status": "down", "http_status": "timeout", "ttfb_ms": null, "uptime_tracked_pct": null }
+  },
+  "history": {},
+  "events": [],
+  "uptime_tracking": {}
+}

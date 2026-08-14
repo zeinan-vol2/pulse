@@ -1,0 +1,69 @@
+name: pulse check
+
+on:
+  schedule:
+    # every 10 minutes. Globalping's free anonymous quota (~250 tests/hour)
+    # is shared across GitHub's runner IPs, so 10 regions every 5 minutes
+    # (120 tests/hour) can be tight if other jobs share the same IP.
+    # Add a GLOBALPING_TOKEN secret (free account) and you can safely go
+    # back down to */5 if you want tighter resolution.
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+# Requires, in this repo's Settings → Secrets and variables → Actions:
+#   Secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY  (IAM user, see README)
+#   Variables: AWS_S3_BUCKET (bucket name), AWS_REGION (optional, defaults to us-east-1)
+#   Optional:  GLOBALPING_TOKEN secret for a higher, dedicated rate limit
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pulse-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run pulse check
+        env:
+          PULSE_TARGET_URL: https://zeinan.fyi
+          # Optional: create a free account at https://dash.globalping.io
+          # and add its token as a repo secret named GLOBALPING_TOKEN for a
+          # higher, dedicated rate limit instead of the shared anonymous one.
+          GLOBALPING_TOKEN: ${{ secrets.GLOBALPING_TOKEN }}
+        run: python scripts/check_pulse.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "pulse-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/pulse-status.json
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "pulse: update telemetry data [skip ci]"
+            git push
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Sync live data to S3
+        run: |
+          aws s3 cp data/pulse-status.json \
+            "s3://${{ vars.AWS_S3_BUCKET }}/data/pulse-status.json" \
+            --cache-control "no-cache, max-age=0"

@@ -1,0 +1,45 @@
+name: deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'pulse.html'
+  workflow_dispatch: {}
+
+# Requires, in this repo's Settings → Secrets and variables → Actions:
+#   Secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY  (IAM user, see README)
+#   Variables: AWS_S3_BUCKET (bucket name), AWS_REGION (optional, defaults to us-east-1)
+#
+# Only triggers on index.html / pulse.html changes — the pulse-bot's own
+# data-only commits (data/pulse-status.json) won't fire this workflow.
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Upload index.html
+        run: |
+          aws s3 cp index.html "s3://${{ vars.AWS_S3_BUCKET }}/index.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache, max-age=0"
+
+      - name: Upload pulse.html
+        run: |
+          aws s3 cp pulse.html "s3://${{ vars.AWS_S3_BUCKET }}/pulse.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache, max-age=0"

@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PulseGithubActionsDeploy",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::YOUR_BUCKET_NAME/index.html",
+        "arn:aws:s3:::YOUR_BUCKET_NAME/pulse.html",
+        "arn:aws:s3:::YOUR_BUCKET_NAME/data/pulse-status.json"
+      ]
+    }
+  ]
+}
