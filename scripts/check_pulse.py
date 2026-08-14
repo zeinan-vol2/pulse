@@ -50,9 +50,24 @@ REGIONS = [
     {"code": "sa-east-1",      "magic": "sa-east-1"},
 ]
 
-# thresholds, in ms, for classifying a successful response
-WARN_ABOVE_MS = 150
-DOWN_ABOVE_MS = 3000  # effectively unreachable / timed out territory
+# thresholds, in ms, for classifying a successful response.
+# Origin is us-east-2, so "warn" thresholds scale with realistic distance —
+# a single global cutoff would flag far regions as "degraded" on every
+# healthy run just because physics.
+REGION_WARN_MS = {
+    'us-east-1':      120,
+    'us-east-2':      120,
+    'us-west-2':      150,
+    'us-west-1':      150,
+    'eu-west-1':      200,
+    'eu-central-1':   200,
+    'me-south-1':     250,
+    'ap-southeast-1': 250,
+    'ap-southeast-2': 250,
+    'sa-east-1':      250,
+}
+DEFAULT_WARN_MS = 200  # fallback for any region not listed above
+DOWN_ABOVE_MS = 3000  # effectively unreachable / timed out territory, same for all regions
 
 HISTORY_MAX_POINTS = 48
 EVENTS_MAX = 30
@@ -104,14 +119,14 @@ def poll_measurement(measurement_id):
     return result  # return whatever we last got, even if still in-progress
 
 
-def classify(status_code, ttfb_ms, probe_error):
+def classify(status_code, ttfb_ms, probe_error, warn_above_ms):
     if probe_error or status_code is None:
         return "down"
     if not (200 <= status_code < 400):
         return "down"
     if ttfb_ms is None or ttfb_ms > DOWN_ABOVE_MS:
         return "down"
-    if ttfb_ms > WARN_ABOVE_MS:
+    if ttfb_ms > warn_above_ms:
         return "warn"
     return "good"
 
@@ -138,7 +153,8 @@ def check_region(region):
         tls = probe_result.get("tls")
 
         probe_error = probe_status == "failed" or status_code is None
-        status = classify(status_code, ttfb, probe_error)
+        warn_above_ms = REGION_WARN_MS.get(code, DEFAULT_WARN_MS)
+        status = classify(status_code, ttfb, probe_error, warn_above_ms)
 
         http_status_label = f"{status_code}" if status_code else ("timeout" if probe_error else "—")
 
