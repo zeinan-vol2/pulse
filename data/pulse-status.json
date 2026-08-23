@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-23T21:29:51Z",
+  "generated_at": "2026-08-23T22:31:16Z",
   "target": "https://zeinan.fyi",
   "overall": "down",
   "tracking_started_at": null,
@@ -10,7 +10,7 @@
       "status": "good"
     },
     "dns": {
-      "ms": 6,
+      "ms": 5,
       "status": "good"
     }
   },
@@ -18,13 +18,13 @@
     "us-east-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 53,
+      "ttfb_ms": 51,
       "uptime_tracked_pct": 99.07
     },
     "us-east-2": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 10,
+      "ttfb_ms": 37,
       "uptime_tracked_pct": 99.53
     },
     "us-west-2": {
@@ -36,19 +36,19 @@
     "us-west-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 89,
+      "ttfb_ms": 94,
       "uptime_tracked_pct": 99.53
     },
     "eu-west-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 116,
+      "ttfb_ms": 118,
       "uptime_tracked_pct": 99.53
     },
     "eu-central-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 138,
+      "ttfb_ms": 134,
       "uptime_tracked_pct": 99.53
     },
     "me-south-1": {
@@ -60,28 +60,24 @@
     "ap-southeast-1": {
       "status": "warn",
       "http_status": "200",
-      "ttfb_ms": 261,
-      "uptime_tracked_pct": 1.87
+      "ttfb_ms": 254,
+      "uptime_tracked_pct": 1.86
     },
     "ap-southeast-2": {
       "status": "warn",
       "http_status": "200",
-      "ttfb_ms": 223,
-      "uptime_tracked_pct": 1.87
+      "ttfb_ms": 225,
+      "uptime_tracked_pct": 1.86
     },
     "sa-east-1": {
       "status": "good",
       "http_status": "200",
       "ttfb_ms": 165,
-      "uptime_tracked_pct": 96.26
+      "uptime_tracked_pct": 96.28
     }
   },
   "history": {
     "us-east-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": 38
-      },
       {
         "t": "20:34:15",
         "ttfb": 49
@@ -269,13 +265,13 @@
       {
         "t": "21:29:51",
         "ttfb": 53
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 51
       }
     ],
     "us-east-2": [
-      {
-        "t": "19:31:56",
-        "ttfb": 29
-      },
       {
         "t": "20:34:15",
         "ttfb": 35
@@ -463,13 +459,13 @@
       {
         "t": "21:29:51",
         "ttfb": 10
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 37
       }
     ],
     "us-west-2": [
-      {
-        "t": "19:31:56",
-        "ttfb": 102
-      },
       {
         "t": "20:34:15",
         "ttfb": 100
@@ -657,13 +653,13 @@
       {
         "t": "21:29:51",
         "ttfb": 95
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 95
       }
     ],
     "us-west-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": 88
-      },
       {
         "t": "20:34:15",
         "ttfb": 86
@@ -851,13 +847,13 @@
       {
         "t": "21:29:51",
         "ttfb": 89
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 94
       }
     ],
     "eu-west-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": 122
-      },
       {
         "t": "20:34:15",
         "ttfb": 116
@@ -1045,13 +1041,13 @@
       {
         "t": "21:29:51",
         "ttfb": 116
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 118
       }
     ],
     "eu-central-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": 140
-      },
       {
         "t": "20:34:15",
         "ttfb": 127
@@ -1239,13 +1235,13 @@
       {
         "t": "21:29:51",
         "ttfb": 138
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 134
       }
     ],
     "me-south-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": null
-      },
       {
         "t": "20:34:15",
         "ttfb": null
@@ -1433,13 +1429,13 @@
       {
         "t": "21:29:51",
         "ttfb": null
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": null
       }
     ],
     "ap-southeast-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": 228
-      },
       {
         "t": "20:34:15",
         "ttfb": 214
@@ -1627,13 +1623,13 @@
       {
         "t": "21:29:51",
         "ttfb": 261
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 254
       }
     ],
     "ap-southeast-2": [
-      {
-        "t": "19:31:56",
-        "ttfb": 222
-      },
       {
         "t": "20:34:15",
         "ttfb": 238
@@ -1821,13 +1817,13 @@
       {
         "t": "21:29:51",
         "ttfb": 223
+      },
+      {
+        "t": "22:31:16",
+        "ttfb": 225
       }
     ],
     "sa-east-1": [
-      {
-        "t": "19:31:56",
-        "ttfb": 179
-      },
       {
         "t": "20:34:15",
         "ttfb": 146
@@ -2014,6 +2010,10 @@
       },
       {
         "t": "21:29:51",
+        "ttfb": 165
+      },
+      {
+        "t": "22:31:16",
         "ttfb": 165
       }
     ]
@@ -2202,44 +2202,44 @@
   ],
   "uptime_tracking": {
     "us-east-1": {
-      "total": 214,
-      "good": 212
+      "total": 215,
+      "good": 213
     },
     "us-east-2": {
-      "total": 214,
-      "good": 213
+      "total": 215,
+      "good": 214
     },
     "us-west-2": {
-      "total": 214,
-      "good": 213
+      "total": 215,
+      "good": 214
     },
     "us-west-1": {
-      "total": 214,
-      "good": 213
+      "total": 215,
+      "good": 214
     },
     "eu-west-1": {
-      "total": 214,
-      "good": 213
+      "total": 215,
+      "good": 214
     },
     "eu-central-1": {
-      "total": 214,
-      "good": 213
+      "total": 215,
+      "good": 214
     },
     "me-south-1": {
-      "total": 214,
+      "total": 215,
       "good": 0
     },
     "ap-southeast-1": {
-      "total": 214,
+      "total": 215,
       "good": 4
     },
     "ap-southeast-2": {
-      "total": 214,
+      "total": 215,
       "good": 4
     },
     "sa-east-1": {
-      "total": 214,
-      "good": 206
+      "total": 215,
+      "good": 207
     }
   }
 }
