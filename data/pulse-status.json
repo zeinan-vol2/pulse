@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T07:27:22Z",
+  "generated_at": "2026-10-21T13:41:20Z",
   "target": "https://zeinan.fyi",
   "overall": "down",
   "tracking_started_at": null,
@@ -10,7 +10,7 @@
       "status": "good"
     },
     "dns": {
-      "ms": 27,
+      "ms": 7,
       "status": "good"
     }
   },
@@ -18,37 +18,37 @@
     "us-east-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 56,
+      "ttfb_ms": 54,
       "uptime_tracked_pct": 99.46
     },
     "us-east-2": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 37,
+      "ttfb_ms": 31,
       "uptime_tracked_pct": 99.64
     },
     "us-west-2": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 102,
+      "ttfb_ms": 93,
       "uptime_tracked_pct": 99.11
     },
     "us-west-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 95,
+      "ttfb_ms": 83,
       "uptime_tracked_pct": 99.46
     },
     "eu-west-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 119,
+      "ttfb_ms": 179,
       "uptime_tracked_pct": 99.46
     },
     "eu-central-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 105,
+      "ttfb_ms": 139,
       "uptime_tracked_pct": 99.64
     },
     "me-south-1": {
@@ -60,28 +60,24 @@
     "ap-southeast-1": {
       "status": "warn",
       "http_status": "200",
-      "ttfb_ms": 256,
-      "uptime_tracked_pct": 0.72
+      "ttfb_ms": 225,
+      "uptime_tracked_pct": 0.71
     },
     "ap-southeast-2": {
       "status": "warn",
       "http_status": "200",
-      "ttfb_ms": 245,
-      "uptime_tracked_pct": 0.72
+      "ttfb_ms": 221,
+      "uptime_tracked_pct": 0.71
     },
     "sa-east-1": {
       "status": "good",
       "http_status": "200",
-      "ttfb_ms": 172,
-      "uptime_tracked_pct": 97.67
+      "ttfb_ms": 168,
+      "uptime_tracked_pct": 97.68
     }
   },
   "history": {
     "us-east-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": 65
-      },
       {
         "t": "17:44:42",
         "ttfb": 56
@@ -269,13 +265,13 @@
       {
         "t": "07:27:22",
         "ttfb": 56
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 54
       }
     ],
     "us-east-2": [
-      {
-        "t": "07:15:04",
-        "ttfb": 8
-      },
       {
         "t": "17:44:42",
         "ttfb": 41
@@ -463,13 +459,13 @@
       {
         "t": "07:27:22",
         "ttfb": 37
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 31
       }
     ],
     "us-west-2": [
-      {
-        "t": "07:15:04",
-        "ttfb": 95
-      },
       {
         "t": "17:44:42",
         "ttfb": 66
@@ -657,13 +653,13 @@
       {
         "t": "07:27:22",
         "ttfb": 102
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 93
       }
     ],
     "us-west-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": 82
-      },
       {
         "t": "17:44:42",
         "ttfb": 90
@@ -851,13 +847,13 @@
       {
         "t": "07:27:22",
         "ttfb": 95
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 83
       }
     ],
     "eu-west-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": 110
-      },
       {
         "t": "17:44:42",
         "ttfb": 109
@@ -1045,13 +1041,13 @@
       {
         "t": "07:27:22",
         "ttfb": 119
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 179
       }
     ],
     "eu-central-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": 140
-      },
       {
         "t": "17:44:42",
         "ttfb": 135
@@ -1239,13 +1235,13 @@
       {
         "t": "07:27:22",
         "ttfb": 105
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 139
       }
     ],
     "me-south-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": null
-      },
       {
         "t": "17:44:42",
         "ttfb": null
@@ -1433,13 +1429,13 @@
       {
         "t": "07:27:22",
         "ttfb": null
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": null
       }
     ],
     "ap-southeast-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": 240
-      },
       {
         "t": "17:44:42",
         "ttfb": 232
@@ -1627,13 +1623,13 @@
       {
         "t": "07:27:22",
         "ttfb": 256
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 225
       }
     ],
     "ap-southeast-2": [
-      {
-        "t": "07:15:04",
-        "ttfb": 224
-      },
       {
         "t": "17:44:42",
         "ttfb": 220
@@ -1821,13 +1817,13 @@
       {
         "t": "07:27:22",
         "ttfb": 245
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 221
       }
     ],
     "sa-east-1": [
-      {
-        "t": "07:15:04",
-        "ttfb": 163
-      },
       {
         "t": "17:44:42",
         "ttfb": 163
@@ -2015,6 +2011,10 @@
       {
         "t": "07:27:22",
         "ttfb": 172
+      },
+      {
+        "t": "13:41:20",
+        "ttfb": 168
       }
     ]
   },
@@ -2202,44 +2202,44 @@
   ],
   "uptime_tracking": {
     "us-east-1": {
-      "total": 559,
-      "good": 556
+      "total": 560,
+      "good": 557
     },
     "us-east-2": {
-      "total": 559,
-      "good": 557
+      "total": 560,
+      "good": 558
     },
     "us-west-2": {
-      "total": 559,
-      "good": 554
+      "total": 560,
+      "good": 555
     },
     "us-west-1": {
-      "total": 559,
-      "good": 556
-    },
-    "eu-west-1": {
-      "total": 559,
-      "good": 556
-    },
-    "eu-central-1": {
-      "total": 559,
+      "total": 560,
       "good": 557
     },
+    "eu-west-1": {
+      "total": 560,
+      "good": 557
+    },
+    "eu-central-1": {
+      "total": 560,
+      "good": 558
+    },
     "me-south-1": {
-      "total": 559,
+      "total": 560,
       "good": 0
     },
     "ap-southeast-1": {
-      "total": 559,
+      "total": 560,
       "good": 4
     },
     "ap-southeast-2": {
-      "total": 559,
+      "total": 560,
       "good": 4
     },
     "sa-east-1": {
-      "total": 559,
-      "good": 546
+      "total": 560,
+      "good": 547
     }
   }
 }
